@@ -1242,16 +1242,16 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   STORE = loadStore() || { users:{}, lastUser:null };
 
-  // try to load users from Supabase (merges with local)
+  // try to load users from Supabase with 4s timeout
   if(sb){
     try {
-      const remoteUsers = await sbLoadUsers();
+      const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),4000));
+      const remoteUsers = await Promise.race([sbLoadUsers(), timeout]);
       if(remoteUsers){
-        // merge: remote wins on conflict (cloud is source of truth)
         Object.assign(STORE.users, remoteUsers);
         localStorage.setItem(STORE_KEY, JSON.stringify(STORE));
       }
-    } catch(e){}
+    } catch(e){ console.warn('Supabase load failed, using local data:', e.message); }
   }
 
   const lastId = STORE.lastUser;
