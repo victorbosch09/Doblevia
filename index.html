@@ -1,0 +1,1292 @@
+
+<title>Doble Vía</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#0b0f1a;--s1:#111827;--s2:#192035;--s3:#1f2a44;
+  --border:#2a3651;--tx:#dce8ff;--tx2:#637da8;--tx3:#374d6b;
+  --ca:#5b9cf6;--ca-bg:rgba(91,156,246,.12);
+  --cb:#f6a94e;--cb-bg:rgba(246,169,78,.12);
+  --ok:#4cd68a;--warn:#f6d44e;--err:#f6614e;
+  --fd:'Syne',system-ui,sans-serif;
+  --fb:'IBM Plex Sans',system-ui,sans-serif;
+  --r:10px;--r2:16px;--sw:230px;
+}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#eef3ff;--s1:#fff;--s2:#e6edf9;--s3:#dce5f5;
+  --border:#c4d3ed;--tx:#111827;--tx2:#4a6285;--tx3:#9ab0cc;
+  color-scheme:light;
+}}
+:root[data-theme="dark"]{--bg:#0b0f1a;--s1:#111827;--s2:#192035;--s3:#1f2a44;--border:#2a3651;--tx:#dce8ff;--tx2:#637da8;--tx3:#374d6b;color-scheme:dark}
+:root[data-theme="light"]{--bg:#eef3ff;--s1:#fff;--s2:#e6edf9;--s3:#dce5f5;--border:#c4d3ed;--tx:#111827;--tx2:#4a6285;--tx3:#9ab0cc;color-scheme:light}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);background:var(--bg);color:var(--tx);font-size:15px;line-height:1.6;overflow-x:hidden;min-height:100%}
+
+/* SHELL */
+#app{display:flex;min-height:100vh}
+#sidebar{width:var(--sw);min-height:100vh;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
+#main{flex:1;min-width:0}
+.screen{display:none;padding:32px 36px;max-width:960px}
+.screen.active{display:block}
+
+/* LOGIN */
+#screen-login{display:none;min-height:100vh;align-items:center;justify-content:center;
+  padding-left:max(20px,env(safe-area-inset-left,0px));
+  padding-right:max(20px,env(safe-area-inset-right,0px));
+  padding-block:40px}
+#screen-login.active{display:flex!important}
+.login-box{width:100%;max-width:400px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:40px}
+.login-logo{font-family:var(--fd);font-size:26px;font-weight:800;margin-bottom:6px}
+.login-sub{color:var(--tx2);font-size:14px;margin-bottom:28px}
+
+/* SIDEBAR */
+.sb-logo{padding:22px 20px 18px;font-family:var(--fd);font-size:18px;font-weight:800;letter-spacing:-.3px}
+.sb-section{padding:10px 16px 3px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--tx3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13.5px;font-weight:500;color:var(--tx2);cursor:pointer;border-left:3px solid transparent;transition:all 140ms;user-select:none}
+.nav-item:hover{background:var(--s2);color:var(--tx)}
+.nav-item.active{background:var(--s2);color:var(--tx);border-left-color:var(--ca)}
+.nav-item.nav-b.active{border-left-color:var(--cb)}
+.nav-item svg{width:15px;height:15px;opacity:.6;flex-shrink:0}
+.nav-item.active svg,.nav-item:hover svg{opacity:1}
+.sb-footer{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border);font-size:13px}
+.sb-uname{font-weight:600;font-size:14px;color:var(--tx);margin-bottom:8px}
+.sb-sub{font-size:11px;color:var(--tx2);margin-bottom:10px}
+
+/* COMPONENTS */
+.page-header{margin-bottom:26px}
+.page-header h1{font-family:var(--fd);font-size:24px;font-weight:700;line-height:1.2;text-wrap:balance}
+.page-header p{color:var(--tx2);margin-top:4px;font-size:14px}
+.sec-title{font-family:var(--fd);font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:20px}
+.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mt{margin-top:24px}
+
+/* STAT */
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px}
+.stat-lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);margin-bottom:5px}
+.stat-val{font-family:var(--fd);font-size:28px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.stat-sub{font-size:12px;color:var(--tx2);margin-top:3px}
+
+/* PROGRESS */
+.pw{background:var(--s3);border-radius:100px;height:5px;overflow:hidden}
+.pf{height:100%;border-radius:100px;transition:width 500ms ease}
+.pfa{background:var(--ca)}.pfb{background:var(--cb)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600}
+.ba{background:var(--ca-bg);color:var(--ca)}
+.bb{background:var(--cb-bg);color:var(--cb)}
+.bok{background:rgba(76,214,138,.12);color:var(--ok)}
+.bwarn{background:rgba(246,212,78,.12);color:var(--warn)}
+.berr{background:rgba(246,97,78,.12);color:var(--err)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--r);border:none;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:all 130ms}
+.btn-a{background:var(--ca);color:#fff}.btn-a:hover{filter:brightness(1.1)}
+.btn-b{background:var(--cb);color:#fff}.btn-b:hover{filter:brightness(1.1)}
+.btn-g{background:var(--s2);color:var(--tx);border:1px solid var(--border)}.btn-g:hover{background:var(--s3)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-lg{padding:12px 22px;font-size:15px;border-radius:var(--r2)}
+.btn-full{width:100%;justify-content:center}
+
+/* FORM */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--tx);font-family:var(--fb);font-size:14px;outline:none;transition:border-color 130ms}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ca)}
+.field select{cursor:pointer}
+.field textarea{resize:vertical;min-height:80px}
+.frow{display:flex;gap:8px}
+.frow .field{flex:1;margin-bottom:0}
+.add-form{background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:14px}
+.add-form-hd{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+
+/* SUBJECT CARD */
+.sub-card{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all 130ms;margin-bottom:8px}
+.sub-card:hover{background:var(--s2);border-color:var(--tx3)}
+.sub-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.sub-info{flex:1;min-width:0}
+.sub-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-meta{font-size:12px;color:var(--tx2);margin-top:1px}
+.sub-right{text-align:right;flex-shrink:0;width:72px}
+.sub-pct{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:4px}
+
+/* TOPIC ROW */
+.topic-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);background:var(--s2);margin-bottom:5px;cursor:pointer;transition:background 130ms}
+.topic-row:hover{background:var(--s3)}
+.tdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tname{flex:1;font-size:13.5px;font-weight:500}
+.tmeta{font-size:11.5px;color:var(--tx2)}
+
+/* TASKS */
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:7px}
+.tcheck{width:19px;height:19px;border-radius:5px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all 130ms}
+.tcheck.done{background:var(--ok);border-color:var(--ok)}
+.tcheck svg{display:none;width:11px;height:11px;stroke:#fff;stroke-width:3}
+.tcheck.done svg{display:block}
+.tbody{flex:1;min-width:0}
+.ttitle{font-size:13.5px;font-weight:500}
+.ttitle.done{text-decoration:line-through;color:var(--tx2)}
+.tmetas{font-size:11.5px;color:var(--tx2);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.turgent{color:var(--err);font-weight:600}
+.tsoon{color:var(--warn);font-weight:600}
+
+/* FLASHCARD */
+.fc-wrap{max-width:580px;margin:0 auto}
+.fc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.fc-prog{font-size:13px;color:var(--tx2)}
+.fc-prog strong{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--tx)}
+.fc-score-live{font-family:var(--fd);font-size:20px;font-weight:700}
+.flashcard{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:40px 32px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:transform 130ms;margin-bottom:16px;user-select:none}
+.flashcard:hover{transform:translateY(-2px)}
+.fc-type{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin-bottom:12px}
+.fc-q{font-family:var(--fd);font-size:18px;font-weight:600;line-height:1.5}
+.fc-a{font-size:14px;line-height:1.75;color:var(--tx);margin-top:14px;display:none;border-top:1px solid var(--border);padding-top:14px;width:100%}
+.fc-a.show{display:block}
+.fc-hint{font-size:12px;color:var(--tx3);font-style:italic;margin-top:10px}
+.fc-tap{font-size:12px;color:var(--tx3);margin-top:12px}
+.fc-tap.hide{display:none}
+.rating-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.rbtn{padding:11px 6px;border-radius:var(--r);border:1px solid var(--border);background:var(--s2);color:var(--tx);cursor:pointer;font-family:var(--fb);font-size:12px;font-weight:600;transition:all 130ms;text-align:center}
+.rbtn .rl{font-size:10px;color:var(--tx2);font-weight:400;display:block;margin-top:2px}
+.rbtn:hover{transform:translateY(-1px)}
+.r0:hover{background:rgba(246,97,78,.2);border-color:var(--err);color:var(--err)}
+.r1:hover{background:rgba(246,212,78,.2);border-color:var(--warn);color:var(--warn)}
+.r2:hover{background:var(--ca-bg);border-color:var(--ca);color:var(--ca)}
+.r3:hover{background:rgba(76,214,138,.2);border-color:var(--ok);color:var(--ok)}
+.rating-hide{display:none}
+
+/* RESULTS */
+.results{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:40px;text-align:center;max-width:480px;margin:0 auto}
+.results-score{font-family:var(--fd);font-size:52px;font-weight:800;line-height:1}
+.results-lbl{color:var(--tx2);margin-top:6px;margin-bottom:22px}
+.results-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+
+/* TABS */
+.tabs{display:flex;gap:3px;background:var(--s2);border-radius:var(--r);padding:3px;margin-bottom:18px}
+.tab{flex:1;text-align:center;padding:7px 8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--tx2);transition:all 130ms;white-space:nowrap}
+.tab.active{background:var(--s1);color:var(--tx)}
+
+/* TIMELINE */
+.tl-day{margin-bottom:22px}
+.tl-date{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
+
+/* EMPTY */
+.empty{text-align:center;padding:44px 20px;color:var(--tx2)}
+.empty svg{width:40px;height:40px;opacity:.22;display:block;margin:0 auto 10px}
+.empty-t{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:4px}
+
+/* BACK */
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--tx2);cursor:pointer;font-size:13px;font-weight:600;margin-bottom:18px;user-select:none}
+.back:hover{color:var(--tx)}
+.back svg{width:15px;height:15px}
+
+/* MOBILE NAV */
+#mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--border);
+  padding:5px max(16px,env(safe-area-inset-left,0px)) max(5px,env(safe-area-inset-bottom,0px));
+  justify-content:space-around;z-index:100}
+.mob-it{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9.5px;font-weight:600;color:var(--tx2);cursor:pointer;padding:4px 6px;min-width:48px}
+.mob-it.active{color:var(--ca)}
+.mob-it svg{width:21px;height:21px}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  #sidebar{display:none}
+  #mob-nav{display:flex}
+  .screen{padding:16px;padding-bottom:80px}
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+  .rating-grid{grid-template-columns:repeat(2,1fr)}
+  .results-breakdown{grid-template-columns:1fr}
+}
+@media(max-width:400px){
+  .g2,.g3,.g4{grid-template-columns:1fr}
+}
+</style>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen">
+  <div class="login-box">
+    <div class="login-logo"><span style="color:var(--ca)">Doble</span><span style="color:var(--cb)">Vía</span></div>
+    <p class="login-sub">Tu espacio de estudio personalizado</p>
+    <div class="field"><label>Nombre</label><input type="text" id="l-name" placeholder="Tu nombre" autocomplete="name"></div>
+    <div class="field"><label>PIN (4 dígitos)</label><input type="password" id="l-pin" maxlength="4" placeholder="••••" autocomplete="current-password"></div>
+    <button class="btn btn-a btn-lg btn-full" style="margin-top:8px" onclick="doLogin()">Entrar →</button>
+    <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--tx2)">Primera vez: escribe cualquier nombre y PIN para crear tu cuenta.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <nav id="sidebar">
+    <div class="sb-logo"><span style="color:var(--ca)">Doble</span><span style="color:var(--cb)">Vía</span></div>
+    <div class="sb-section">General</div>
+    <div class="nav-item active" data-s="dashboard" onclick="go('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" data-s="schedule" onclick="go('schedule')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Cronograma
+    </div>
+    <div class="nav-item" data-s="tasks" onclick="go('tasks')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Tareas
+    </div>
+    <div class="sb-section" style="margin-top:6px">Derecho y CC.PP.</div>
+    <div class="nav-item" data-s="career-a" onclick="go('career-a')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Materias
+    </div>
+    <div class="sb-section" style="margin-top:6px">Marketing y Marca</div>
+    <div class="nav-item nav-b" data-s="career-b" onclick="go('career-b')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Materias
+    </div>
+    <div class="sb-footer">
+      <div class="sb-uname" id="sb-name">—</div>
+      <div class="sb-sub" id="sb-streak">—</div>
+      <button class="btn btn-g btn-sm btn-full" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- DASHBOARD -->
+    <div class="screen active" id="screen-dashboard">
+      <div class="page-header">
+        <h1 id="dash-greeting">Buenos días</h1>
+        <p>Resumen de tu progreso académico</p>
+      </div>
+      <div class="g4" id="dash-stats"></div>
+      <div class="g2 mt">
+        <div>
+          <div class="sec-title"><span><span style="color:var(--ca)">●</span> Derecho y CC.PP.</span><button class="btn btn-a btn-sm" onclick="go('career-a')">Ver →</button></div>
+          <div id="dash-subs-a"></div>
+        </div>
+        <div>
+          <div class="sec-title"><span><span style="color:var(--cb)">●</span> Marketing y Marca</span><button class="btn btn-b btn-sm" onclick="go('career-b')">Ver →</button></div>
+          <div id="dash-subs-b"></div>
+        </div>
+      </div>
+      <div class="mt">
+        <div class="sec-title">Tareas próximas</div>
+        <div id="dash-tasks"></div>
+      </div>
+    </div>
+
+    <!-- CAREER A -->
+    <div class="screen" id="screen-career-a">
+      <div class="page-header">
+        <div class="badge ba" style="margin-bottom:8px">1er año</div>
+        <h1>Derecho y Ciencias Políticas</h1>
+        <p id="ca-univ" style="color:var(--tx2)">Universidad</p>
+      </div>
+      <div class="sec-title">
+        Materias
+        <button class="btn btn-a btn-sm" onclick="openAddSubject('a')">+ Materia</button>
+      </div>
+      <div id="list-subs-a"></div>
+      <div id="form-sub-a" style="display:none"></div>
+    </div>
+
+    <!-- CAREER B -->
+    <div class="screen" id="screen-career-b">
+      <div class="page-header">
+        <div class="badge bb" style="margin-bottom:8px">2do año</div>
+        <h1>Marketing Digital y Gerencia de Marca</h1>
+        <p id="cb-univ" style="color:var(--tx2)">Universidad</p>
+      </div>
+      <div class="sec-title">
+        Materias
+        <button class="btn btn-b btn-sm" onclick="openAddSubject('b')">+ Materia</button>
+      </div>
+      <div id="list-subs-b"></div>
+      <div id="form-sub-b" style="display:none"></div>
+    </div>
+
+    <!-- SUBJECT -->
+    <div class="screen" id="screen-subject">
+      <div class="back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </div>
+      <div class="page-header">
+        <div id="subj-badge" class="badge ba" style="margin-bottom:8px"></div>
+        <h1 id="subj-title"></h1>
+        <p id="subj-meta" style="color:var(--tx2)"></p>
+      </div>
+      <div class="g3" style="margin-bottom:24px" id="subj-stats"></div>
+      <div class="sec-title">
+        Temas
+        <button id="btn-add-topic" class="btn btn-sm">+ Tema</button>
+      </div>
+      <div id="subj-topics"></div>
+      <div id="form-topic" style="display:none"></div>
+    </div>
+
+    <!-- TOPIC / STUDY SETUP -->
+    <div class="screen" id="screen-topic">
+      <div class="back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </div>
+      <div class="page-header">
+        <div id="topic-subj-badge" class="badge ba" style="margin-bottom:8px"></div>
+        <h1 id="topic-title"></h1>
+        <p id="topic-meta" style="color:var(--tx2)"></p>
+      </div>
+      <div class="g3" style="margin-bottom:22px" id="topic-stats"></div>
+      <div class="tabs">
+        <div class="tab active" onclick="topicTab('cards')" id="ttab-cards">Tarjetas</div>
+        <div class="tab" onclick="topicTab('add')" id="ttab-add">+ Añadir tarjeta</div>
+      </div>
+      <div id="topic-cards-view">
+        <div id="topic-cards-list"></div>
+        <button class="btn btn-a btn-lg" style="margin-top:16px" onclick="startStudy()" id="btn-study-topic">Estudiar ahora →</button>
+      </div>
+      <div id="topic-add-view" style="display:none">
+        <div class="add-form">
+          <div class="add-form-hd">Nueva tarjeta</div>
+          <div class="field"><label>Pregunta (hazla difícil)</label><textarea id="new-q" placeholder="¿Cuál es el fundamento jurídico de...?"></textarea></div>
+          <div class="field"><label>Respuesta completa</label><textarea id="new-a" placeholder="Respuesta detallada..."></textarea></div>
+          <div class="frow">
+            <button class="btn btn-a" onclick="addCard()">Guardar tarjeta</button>
+            <button class="btn btn-g" onclick="topicTab('cards')">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDY -->
+    <div class="screen" id="screen-study">
+      <div class="back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Terminar sesión
+      </div>
+      <div id="study-area" class="fc-wrap"></div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="screen" id="screen-tasks">
+      <div class="page-header">
+        <h1>Tareas</h1>
+        <p>Gestión de entregas y actividades</p>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="taskTab('pending')" id="ttask-pending">Pendientes</div>
+        <div class="tab" onclick="taskTab('done')" id="ttask-done">Completadas</div>
+        <div class="tab" onclick="taskTab('add')" id="ttask-add">+ Nueva</div>
+      </div>
+      <div id="tasks-pending-view"><div id="tasks-list-pending"></div></div>
+      <div id="tasks-done-view" style="display:none"><div id="tasks-list-done"></div></div>
+      <div id="tasks-add-view" style="display:none">
+        <div class="add-form">
+          <div class="add-form-hd">Nueva tarea</div>
+          <div class="field"><label>Título</label><input type="text" id="t-title" placeholder="Descripción de la tarea"></div>
+          <div class="frow">
+            <div class="field"><label>Carrera</label>
+              <select id="t-career">
+                <option value="a">Derecho y CC.PP.</option>
+                <option value="b">Marketing y Marca</option>
+              </select>
+            </div>
+            <div class="field"><label>Materia</label><select id="t-subject"><option value="">Sin materia</option></select></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Fecha límite</label><input type="date" id="t-due"></div>
+            <div class="field"><label>Tipo</label>
+              <select id="t-type">
+                <option value="tarea">Tarea</option>
+                <option value="examen">Examen</option>
+                <option value="parcial">Parcial</option>
+                <option value="proyecto">Proyecto</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
+            <button class="btn btn-a" onclick="addTask()">Guardar</button>
+            <button class="btn btn-g" onclick="taskTab('pending')">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="screen" id="screen-schedule">
+      <div class="page-header">
+        <h1>Cronograma</h1>
+        <p>Próximas entregas y revisiones de repaso</p>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="schedTab('upcoming')" id="stab-up">Próximas tareas</div>
+        <div class="tab" onclick="schedTab('review')" id="stab-rev">Repasos pendientes</div>
+      </div>
+      <div id="sched-upcoming"></div>
+      <div id="sched-review" style="display:none"></div>
+    </div>
+  </main>
+</div>
+
+<nav id="mob-nav">
+  <div class="mob-it active" data-s="dashboard" onclick="go('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    Inicio
+  </div>
+  <div class="mob-it" data-s="career-a" onclick="go('career-a')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    Derecho
+  </div>
+  <div class="mob-it" data-s="career-b" onclick="go('career-b')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    Marketing
+  </div>
+  <div class="mob-it" data-s="tasks" onclick="go('tasks')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    Tareas
+  </div>
+  <div class="mob-it" data-s="schedule" onclick="go('schedule')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Agenda
+  </div>
+</nav>
+
+<script>
+// ======= CONSTANTS =======
+const KEY = 'dv2_data';
+const INTERVALS = [0,1,3,7,14,30]; // days per leitner box
+
+// ======= DATA =======
+let D = null;
+let ctx = { careerId: null, subjectId: null, topicId: null, prevScreen: null };
+let session = { cards: [], idx: 0, correct: 0, wrong: 0, hard: 0 };
+
+function makeCard(q,a){return{id:uid(),q,a,box:1,nextReview:null,reviews:0,correct:0};}
+
+function defaultData(name, pin) {
+  const cp_m1u1=[
+    makeCard('¿Cuál es la diferencia fundamental entre ciencias formales y ciencias fácticas según Mario Bunge? ¿Por qué esta distinción importa para la Ciencia Política?','Las ciencias formales (lógica, matemáticas) estudian entes ideales y se validan por deducción lógica, sin necesidad de experiencia. Las ciencias fácticas estudian hechos del mundo real y verifican hipótesis mediante observación y experimentación. La Ciencia Política es fáctica porque estudia fenómenos reales como el poder y el Estado; sus conclusiones son siempre provisionales y deben verificarse empíricamente.'),
+    makeCard('Explica por qué el conocimiento empírico es "perfectible y probabilístico" y qué consecuencia tiene esto para las teorías políticas.','Es perfectible porque puede mejorarse o refutarse con nueva evidencia; probabilístico porque no ofrece certezas absolutas sino grados de verosimilitud. Para la Ciencia Política esto significa que ninguna teoría política es definitiva: nuevos datos o contextos pueden obligar a revisarlas completamente.'),
+    makeCard('Según Niklas Luhmann, ¿qué es la "observación de segundo orden" y cómo aplica a las ciencias sociales?','Es observar a los observadores: en lugar de estudiar solo la realidad, las ciencias sociales estudian cómo las personas interpretan esa realidad y generan sentido dentro de los sistemas sociales. Implica que el científico social también forma parte de lo que estudia.'),
+    makeCard('¿Por qué se afirma que las ciencias sociales tienen una dimensión "pragmática" que las distingue de las ciencias naturales?','Porque incorporan los valores, creencias e intereses del investigador en el proceso de producción del conocimiento. A diferencia de las ciencias naturales (que refieren objetivamente a la realidad), las sociales no pueden separarse completamente del contexto cultural e ideológico del investigador.'),
+    makeCard('¿Cuáles son las dos características principales del conocimiento científico fáctico y en qué se diferencian entre sí?','Racionalidad (uso ordenado de conceptos, inferencias lógicas y teorías organizadas) y objetividad (adecuación a los hechos mediante observación y experimentación reproducible). La racionalidad es interna al sistema de pensamiento; la objetividad exige contraste con la realidad externa.')
+  ];
+  const cp_m1u2=[
+    makeCard('Weber y Dahl coinciden en una definición de poder. ¿Cuál es y en qué se diferencia de una simple jerarquía laboral?','El poder es cuando un individuo logra que otro haga algo que normalmente no haría. Difiere de la jerarquía porque esta se basa en acuerdos formales y consentidos; el poder puede ejercerse sin ese consentimiento, incluso mediante la coerción o la influencia.'),
+    makeCard('¿Cuál es la característica que distingue al Estado de cualquier otra organización política, según la ciencia política moderna?','El monopolio legítimo de la fuerza. El Estado es la única organización que puede ejercer la violencia de manera legítima sobre una población dentro de un territorio, y tiene la capacidad exclusiva de establecer y hacer cumplir leyes.'),
+    makeCard('¿Por qué los grupos de presión son relevantes para el concepto de democracia? ¿Representan un fortalecimiento o una amenaza al sistema?','Actúan fuera de los canales formales del Estado pero influyen en las decisiones gubernamentales. Representan intereses específicos que no siempre coinciden con el bien común, lo que cuestiona la neutralidad del sistema democrático y muestra que la política ocurre también fuera de las instituciones formales.'),
+    makeCard('¿Qué mecanismos incluyen las relaciones de poder según el resumen, y cuál resulta más relevante para entender los movimientos sociales?','Dominación, resistencia, negociación y emancipación. La resistencia y la emancipación son clave para los movimientos sociales, pues explican cómo grupos subordinados buscan modificar o escapar de las estructuras de poder existentes.'),
+    makeCard('Define "política" según el resumen y explica por qué no se limita al gobierno ni al Estado.','La política se relaciona con la lucha por obtener, mantener o influir en el poder dentro de una sociedad, incluyendo cómo se organizan los recursos y se toman decisiones colectivas. No se limita al gobierno porque el poder se ejerce también en empresas, iglesias, sindicatos y cualquier organización donde existan relaciones de dominación y resistencia.')
+  ];
+  const dr_m1u1=[
+    makeCard('¿Qué se quiere decir con que "Grecia conquistó a Roma culturalmente"? Proporciona al menos tres áreas concretas.','Aunque Roma conquistó militarmente a Grecia en el siglo II a.C., los romanos adoptaron la cultura griega en arte, filosofía, religión y derecho. Las instituciones griegas (ciudadanía, democracia, ética jurídica) sirvieron de base para que Roma perfeccionara su propio sistema político y jurídico.'),
+    makeCard('¿En qué difería fundamentalmente el sistema político de Atenas del de Esparta, y cuál de los dos influyó más en el concepto moderno de ciudadanía?','Atenas promovía la democracia directa a través de la Ecclesia (participación de los ciudadanos en decisiones políticas). Esparta tenía una organización militar estricta basada en la agogé. Atenas influyó más en el concepto moderno de ciudadanía al desarrollar la participación política directa.'),
+    makeCard('¿Qué era la Ecclesia, cuál era su función y cuál era su equivalente en Esparta?','La Ecclesia era la asamblea principal en Atenas donde los ciudadanos tomaban decisiones políticas directamente. Su equivalente en Esparta era la Apella, aunque con menos poder real dado que el sistema espartano era más oligárquico y militar.'),
+    makeCard('¿Por qué el estudio de la relación Grecia-Roma es relevante para un estudiante latinoamericano de Derecho?','Porque la herencia greco-romana llegó a América a través de los procesos de colonización, siendo el fundamento del derecho occidental en el que se basan los sistemas jurídicos latinoamericanos actuales. Entender ese origen permite comprender el fundamento filosófico de instituciones jurídicas vigentes.'),
+    makeCard('¿Qué era la Gerusía en Esparta y qué función cumplía? ¿Qué implica su existencia sobre el sistema político espartano?','Era el Consejo de ancianos en Esparta con funciones legislativas y judiciales. Su existencia, junto con los éforos, implicaba que el sistema espartano no era una monarquía pura sino una forma mixta donde el poder del rey estaba limitado por instituciones colegiadas.')
+  ];
+  const dr_m1u2=[
+    makeCard('¿Por qué la "Constitución" romana es un concepto diferente al de una constitución moderna?','Porque no era un documento único y formal, sino un sistema evolutivo no codificado que se desarrolló a lo largo de distintas etapas históricas. Las constituciones modernas son escritas, rígidas y fundacionales; la romana era consuetudinaria, flexible y acumulativa.'),
+    makeCard('Enumera las 4 etapas de la organización política romana y describe la fuente de derecho predominante en cada una.','1) Monarquía: costumbre (mores maiorum), sin leyes escritas formales. 2) República: Ley de las XII Tablas, plebiscitos, senadoconsultos, edictos de magistrados, jurisprudencia. 3) Principado: apariencia republicana pero poder concentrándose en el emperador. 4) Imperio absoluto: todo el poder legislativo en el emperador; surge el Código Teodosiano.'),
+    makeCard('¿Cuál fue la importancia histórica de la Ley de las XII Tablas en el contexto de las luchas entre patricios y plebeyos?','Fue la primera codificación escrita del derecho romano, lo que limitó la arbitrariedad de los patricios al aplicar el derecho oral. Las luchas entre patricios y plebeyos impulsaron esta codificación, que garantizaba que todos conocieran las normas y no dependieran del criterio exclusivo de los jueces patricios.'),
+    makeCard('¿Qué distinguía al Principado de un Imperio absoluto, aunque ambos concentraban poder en una sola persona?','En el Principado (iniciado con Augusto) se mantenía la apariencia de la República: el Senado seguía existiendo y el poder se presentaba como delegado. En el Imperio absoluto el emperador concentraba todo el poder político, administrativo y legislativo sin esa apariencia republicana, incluso por encima de la ley.'),
+    makeCard('¿Cuáles eran las funciones de los cónsules y los pretores en la República romana, y por qué coexistían?','Los cónsules eran los máximos magistrados con poder ejecutivo y militar (dos por año, para evitar tiranía). Los pretores se encargaban de la administración de justicia. Coexistían porque la República dividió intencionalmente el poder entre magistraturas para evitar la concentración de autoridad propia de la monarquía.')
+  ];
+  const sj_m1u1=[
+    makeCard('¿En qué se diferencia la sociología jurídica de la filosofía del derecho, dado que ambas estudian el derecho?','La filosofía del derecho analiza el deber ser del derecho (qué debería ser justo). La sociología jurídica estudia el ser del derecho: cómo nace como producto social, cómo regula efectivamente la sociedad y qué tan efectivas son las normas en la realidad concreta.'),
+    makeCard('Explica la afirmación "no existe sociedad sin derecho, ni derecho sin sociedad" con un ejemplo concreto.','Toda sociedad genera normas para regular la convivencia; sin normas, no hay cohesión social. Y el derecho solo tiene sentido dentro de una sociedad a la que regula. Ejemplo: las normas de tráfico solo existen porque hay una sociedad que usa vehículos y calles compartidas; sin sociedad no tendría sentido la norma.'),
+    makeCard('¿Cuáles son las tres funciones del derecho en la sociedad y en qué casos pueden entrar en conflicto entre sí?','Bien común (bienestar general), justicia (igualdad, libertad, equidad) y seguridad jurídica (certeza sobre consecuencias de los actos). Conflicto posible: una norma puede dar seguridad jurídica (certeza legal) pero ser injusta, o buscar el bien común de la mayoría sacrificando los derechos de una minoría.'),
+    makeCard('¿Por qué Auguste Comte es el fundador de la sociología, y cómo amplió Max Weber ese concepto original?','Comte la definió como el estudio científico de la sociedad, aplicando el método positivo (empírico y observable) a los fenómenos sociales. Weber amplió el concepto al añadir que la sociología también busca comprender el significado de las conductas humanas (verstehen), no solo describirlas objetivamente.'),
+    makeCard('¿Qué es la "coercibilidad" y por qué es el elemento definitorio de la norma jurídica frente a otras normas sociales (morales, religiosas)?','La coercibilidad es la capacidad del Estado para hacer cumplir la ley mediante la fuerza si es necesario. La distingue de las normas morales y religiosas, que carecen de ese respaldo coercitivo estatal. Una persona puede violar una norma moral sin consecuencia jurídica, pero violar una norma jurídica expone al infractor a la sanción del Estado.')
+  ];
+
+  const cp_m2u3=[
+    makeCard('¿En qué siglo y país surgió la Teoría del Estado como disciplina dentro del derecho público?','En Alemania durante el siglo XIX.'),
+    makeCard('¿Cuál es la diferencia fundamental entre naturalismo y contractualismo sobre el origen del Estado?','Naturalismo: el Estado es natural y anterior al individuo; contractualismo: surge de un pacto entre individuos para proteger sus derechos.'),
+    makeCard('¿Qué es la poliarquía medieval y cómo difiere del Estado moderno?','Sistema donde varios gobernantes ejercen autoridad sobre un mismo territorio; el Estado moderno centraliza el poder soberano en una sola entidad.'),
+    makeCard('¿Qué proceso histórico impulsó el concepto de Estado-nación basado en soberanía popular e igualdad ante la ley?','La Revolución Francesa.'),
+    makeCard('¿Qué diferencia hay entre el liberalismo clásico y el neoliberalismo respecto al Estado?','El neoliberalismo enfatiza específicamente la desregulación económica y el protagonismo del mercado; el liberalismo clásico limitaba el Estado pero sin ese énfasis en desregulación financiera.')
+  ];
+  const cp_m3u4=[
+    makeCard('¿Cuáles son los tres tipos de habilidades para la vida según OMS/UNICEF y qué función cumple cada una?','Cognitivas (analizar y decidir), emocionales (reconocer emociones propias), sociales (comunicación y convivencia).'),
+    makeCard('¿Qué diferencia hay entre resiliencia y adaptabilidad?','Resiliencia = superar dificultades ya ocurridas; adaptabilidad = ajustarse a cambios nuevos y futuros.'),
+    makeCard('¿Por qué el pensamiento crítico supera a la memoria como habilidad universitaria?','Permite analizar información, evaluar alternativas y tomar decisiones razonadas en lugar de solo reproducir datos.'),
+    makeCard('¿Qué es el liderazgo y cuáles son sus componentes esenciales según esta unidad?','Capacidad de guiar, motivar e influir en otros para alcanzar objetivos comunes; componentes: dirección, motivación e influencia.'),
+    makeCard('¿Qué distingue a las competencias para la vida de las habilidades técnicas profesionales?','Son transversales (sirven en cualquier ámbito personal, social y profesional); las técnicas son específicas de un campo.')
+  ];
+  const cp_m3u5=[
+    makeCard('¿Quiénes impulsaron la democracia en Atenas y sobre qué tres principios se fundamentaba?','Clístenes y Pericles; principios: igualdad ante la ley, debate público y participación ciudadana en decisiones políticas.'),
+    makeCard('¿Cuál es la diferencia exacta entre pluralidad, alternabilidad y representatividad?','Pluralidad = múltiples grupos e ideas coexisten; alternabilidad = distintos partidos pueden acceder al poder; representatividad = gobernantes actúan en nombre del pueblo.'),
+    makeCard('¿Cómo funciona el sistema electoral proporcional y en qué difiere del mayoritario?','Proporcional: escaños distribuidos según % de votos; mayoritario: gana quien obtiene más votos sin importar proporción.'),
+    makeCard('¿Qué son las garantías individuales y cuál es su función frente al poder del Estado?','Mecanismos legales que protegen los derechos humanos ciudadanos frente al poder estatal, impidiendo su vulneración arbitraria.'),
+    makeCard('¿Por qué la República romana no era una democracia plena pese a tener elementos democráticos?','El poder real residía en el Senado y magistrados; los ciudadanos solo participaban en asambleas y elegían algunos representantes, sin control efectivo del gobierno.')
+  ];
+  const cp_m3u6=[
+    makeCard('¿Cuál es la diferencia entre monarquía parlamentaria, constitucional y absoluta?','Parlamentaria = monarca simbólico, gobierno democrático real; constitucional = poder limitado por constitución; absoluta = monarca concentra todo el poder sin limitaciones.'),
+    makeCard('¿Qué caracteriza al sistema semipresidencialista frente al presidencialismo puro?','Existe presidente Y primer ministro compartiendo gobierno; en el presidencialismo puro el presidente ejerce solo ambos roles (jefe de Estado y de gobierno).'),
+    makeCard('¿Cómo mantienen el control los regímenes dictatoriales?','Mediante propaganda política, control social y limitación de la oposición; sin elecciones libres ni pluralismo real.'),
+    makeCard('¿Qué es un régimen híbrido y por qué es problemático democráticamente?','Combina elementos democráticos con prácticas autoritarias; aparenta legitimidad democrática mientras erosiona garantías ciudadanas reales.'),
+    makeCard('¿Cuál es la función del parlamento en un sistema parlamentario?','Representa ciudadanos, crea leyes, supervisa al gobierno y elige/respalda al primer ministro; el ejecutivo depende de su confianza.')
+  ];
+  const cp_m3u7=[
+    makeCard('¿Qué son las políticas públicas y cuál es su finalidad?','Proyectos o actividades que el Estado diseña y gestiona para satisfacer necesidades sociales; son el pacto entre Estado y sociedad.'),
+    makeCard('¿Cuál es la diferencia técnica entre gobernabilidad y gobernanza?','Gobernabilidad = capacidad de coordinar acciones y mantener orden social; gobernanza = eficacia, calidad y legitimidad de la intervención estatal (término surgido en los 90).'),
+    makeCard('¿Por qué los grupos vulnerables son objeto específico de políticas públicas?','Tienen mayor riesgo de sufrir daño o dificultades; la intervención focalizada garantiza condiciones mínimas que el mercado no provee.'),
+    makeCard('¿Qué relación existe entre el ciclo de políticas públicas y la gobernanza?','El ciclo (diseño, implementación, evaluación) es la práctica concreta de la gobernanza; buena gobernanza = ciclo eficaz, legítimo y orientado al bienestar.'),
+    makeCard('¿Qué implica la pregunta "¿determina el sistema de gobierno el desarrollo social?" para políticas públicas?','Que las decisiones políticas e institucionales —no solo recursos económicos— determinan si una sociedad prospera.')
+  ];
+  const cp_m4u8=[
+    makeCard('¿Qué fueron los acuerdos de Bretton Woods (1944) y qué tres instituciones surgieron de ellos?','Acuerdos que establecieron el orden económico mundial de posguerra; crearon el FMI, el Banco Mundial y la OMC.'),
+    makeCard('¿Cómo afecta la globalización a la soberanía de los Estados-nación?','La reduce porque muchas decisiones económicas y políticas dependen de acuerdos internacionales, limitando la autonomía estatal.'),
+    makeCard('¿Qué es la globalización financiera y qué riesgo sistémico representa?','El papel dominante del sector financiero global; las crisis financieras se transmiten rápidamente entre países interconectados.'),
+    makeCard('¿Por qué el comercio del siglo XV se considera el origen de la globalización sin existir tecnología moderna?','Porque ya implicaba flujo de bienes, servicios y capital entre naciones, que es la esencia del proceso globalizador.'),
+    makeCard('¿Cuáles son los tres desafíos principales de la globalización?','Desigualdades económicas, dependencia financiera entre países y transformación del papel de los Estados-nación.')
+  ];
+  const dr_m1u3=[
+    makeCard('¿Cuál es la diferencia entre "ius" y "fas" en el sistema jurídico romano?','Ius = derecho humano basado en justicia y equidad; fas = derecho divino relacionado con la voluntad de los dioses.'),
+    makeCard('¿Cuáles son los "Tria iuris praecepta" y qué principio establece cada uno?','Vivir honestamente (honeste vivere), no dañar a otro (neminem laedere) y dar a cada uno lo suyo (suum cuique tribuere).'),
+    makeCard('¿Cuál es la diferencia entre ius civile e ius gentium y por qué era necesaria esta distinción?','Ius civile = exclusivo de ciudadanos romanos; ius gentium = común entre pueblos para extranjeros; Roma necesitaba regular relaciones con no ciudadanos por su expansión imperial.'),
+    makeCard('¿Por qué el Corpus Iuris Civilis de Justiniano fue decisivo para el derecho occidental?','Recopiló y sistematizó todo el derecho romano, ejerciendo influencia decisiva sobre los sistemas jurídicos de tradición romano-germánica actuales.'),
+    makeCard('¿Cómo evolucionó la lex romana desde imposición hacia consenso?','Pasó a entenderse como acuerdo de voluntad entre ciudadanos (pública o privada), demostrando que el derecho era también producto del consenso social.')
+  ];
+  const dr_m2u4=[
+    makeCard('¿Cuáles son los tres estatus para plena capacidad jurídica en Roma y qué implica carecer de uno?','Status libertatis (libertad), status civitatis (ciudadanía) y status familiae (independencia familiar); faltar cualquiera reducía o eliminaba la capacidad jurídica.'),
+    makeCard('¿Qué es la capitis diminutio y cómo se clasificaba según su gravedad?','Pérdida de un estatus jurídico; máxima = perder libertad (esclavitud), media = perder ciudadanía, mínima = cambio en posición familiar.'),
+    makeCard('¿Cuál era la paradoja jurídica del esclavo romano?','Era considerado objeto (res) y no sujeto de derecho, pero con el tiempo se reconocieron protecciones y posibilidad de libertad por manumisión, creando tensión entre su condición de "cosa" y persona potencial.'),
+    makeCard('¿Qué diferencia al "sui iuris" del "alieni iuris" en la familia romana?','Sui iuris = paterfamilias, único plenamente independiente jurídicamente; alieni iuris = miembros bajo su poder (hijos, esposa bajo manus) sin capacidad jurídica autónoma.'),
+    makeCard('¿Por qué el Derecho Romano reconoció personas jurídicas no humanas y qué capacidades les otorgó?','Para regular asociaciones y fundaciones; les otorgó capacidad patrimonial, siendo antecedente fundamental del derecho corporativo moderno.')
+  ];
+  const dr_m2u5=[
+    makeCard('¿Qué son los vicios de la voluntad y cómo afectan la validez de un negocio jurídico?','Defectos que corrompen la voluntad libre (error, dolo, violencia); invalidan el acto jurídico porque la voluntad no se expresó válidamente.'),
+    makeCard('¿Cuál es la diferencia entre elementos esenciales y accidentales de un negocio jurídico?','Esenciales (voluntad, objeto, causa) = indispensables para su existencia; accidentales (condiciones, términos, modos) = modifican efectos pero su ausencia no lo hace inexistente.'),
+    makeCard('¿De qué cinco fuentes pueden surgir obligaciones en el derecho romano?','Contratos, delitos, cuasicontratos, cuasidelitos y la ley.'),
+    makeCard('¿Qué distingue al dolo del error como vicios de la voluntad?','Dolo = engaño intencional de una parte para inducir a error a otra (mala fe activa); error = equivocación sin intención maliciosa del otro.'),
+    makeCard('¿De qué formas podía extinguirse una obligación romana?','Por cumplimiento, pago, compensación, pérdida de la cosa o acuerdo entre las partes.')
+  ];
+  const sj_m2=[
+    makeCard('¿Cuál es la diferencia entre los modelos internalista, situacionista e interaccionista de la personalidad?','Internalista = conducta determinada por factores internos; situacionista = determinada por el entorno; interaccionista = producto de la interacción entre características personales y ambiente.'),
+    makeCard('¿Por qué Karl Marx es relevante para la sociología jurídica aunque no era jurista?','Analizó cómo la lucha de clases y la economía determinan las estructuras jurídicas, demostrando que el derecho refleja relaciones de poder económico, no es neutral.'),
+    makeCard('¿Cuál es la diferencia entre solidaridad mecánica y orgánica según Durkheim?','Mecánica = cohesión por similitud en sociedades tradicionales; orgánica = cohesión por interdependencia basada en división del trabajo en sociedades modernas.'),
+    makeCard('¿Qué distingue metodológicamente a Weber de Durkheim?','Durkheim estudiaba hechos sociales como cosas objetivas externas; Weber se centró en comprender el sentido subjetivo que los individuos dan a sus conductas (acción social).'),
+    makeCard('¿Qué significa la "modernidad líquida" de Bauman y qué implica para el derecho contemporáneo?','Sociedad caracterizada por inestabilidad y cambio constante; para el derecho implica que las normas deben adaptarse continuamente a realidades sociales fluidas.')
+  ];
+  const sj_m3=[
+    makeCard('¿Cuál es la postura de Hans Kelsen sobre la relación derecho-moral y qué crítica se le hace?','Propone estudiar el derecho separado de la moral (Teoría pura); crítica: en la práctica ambas se relacionan inevitablemente y separarlas distorsiona la realidad jurídica.'),
+    makeCard('¿Cuáles son los tres tipos de desviación del comportamiento y cómo se distinguen?','Conducta conforme (sigue normas), conducta desviada pura (viola norma y es reconocida como tal), falsa acusación (se percibe como infracción pero no lo es).'),
+    makeCard('¿Qué es la anomia y por qué genera desviación social?','Ausencia o debilidad de normas sociales; sin marcos normativos claros los individuos no tienen referencia para sus conductas, facilitando el comportamiento antisocial.'),
+    makeCard('¿Cómo explica el aprendizaje social el cumplimiento o incumplimiento de la ley?','Las personas adquieren conductas observando a otros; si el entorno normaliza el incumplimiento legal, el individuo tenderá a imitarlo; el derecho también educa a través de este mecanismo.'),
+    makeCard('¿Por qué una persona puede cumplir la ley por tres razones distintas simultáneamente?','Por miedo al castigo (dimensión jurídica), por valores personales (dimensión moral) y por imitar conductas del entorno (aprendizaje social/psicología).')
+  ];
+
+  const sid1='cp',sid2='dr',sid3='sj',sid4='fd',sid5='te',sid6='id',sid7='da';
+  const tid1a='cp1',tid1b='cp2',tid2a='dr1',tid2b='dr2',tid3a='sj1';
+  return {
+    user: { name, pin },
+    careers: {
+      a: {
+        id:'a', name:'Derecho y Ciencias Políticas', year:'1er año',
+        university:'', color:'a',
+        subjects:{
+          [sid1]:{id:sid1,name:'Principios de Ciencias Políticas',emoji:'🏛️',topics:{
+            [tid1a]:{id:tid1a,name:'Módulo 1 – Concepto de Ciencia',cards:cp_m1u1},
+            [tid1b]:{id:tid1b,name:'Módulo 1 – Objetos de la Ciencia Política',cards:cp_m1u2},
+            cp3:{id:'cp3',name:'Módulo 2 – Teoría del Estado',cards:cp_m2u3},
+            cp4:{id:'cp4',name:'Módulo 3 – Líder Universitario',cards:cp_m3u4},
+            cp5:{id:'cp5',name:'Módulo 3 – La Democracia',cards:cp_m3u5},
+            cp6:{id:'cp6',name:'Módulo 3 – Sistemas de Gobierno',cards:cp_m3u6},
+            cp7:{id:'cp7',name:'Módulo 3 – Políticas Públicas',cards:cp_m3u7},
+            cp8:{id:'cp8',name:'Módulo 4 – Globalización',cards:cp_m4u8}
+          }},
+          [sid2]:{id:sid2,name:'Derecho Romano',emoji:'⚖️',topics:{
+            [tid2a]:{id:tid2a,name:'Módulo 1 – La Conquista de Roma sobre Grecia',cards:dr_m1u1},
+            [tid2b]:{id:tid2b,name:'Módulo 1 – La Constitución Política de Roma',cards:dr_m1u2},
+            dr3:{id:'dr3',name:'Módulo 1 – El Concepto de Derecho en Roma (IUS)',cards:dr_m1u3},
+            dr4:{id:'dr4',name:'Módulo 2 – Sujeto de Derecho y Personalidad Jurídica',cards:dr_m2u4},
+            dr5:{id:'dr5',name:'Módulo 2 – El Negocio Jurídico en Roma',cards:dr_m2u5}
+          }},
+          [sid3]:{id:sid3,name:'Sociología Jurídica',emoji:'📚',topics:{
+            [tid3a]:{id:tid3a,name:'Módulo 1 – Sociología y Sociología Jurídica',cards:sj_m1u1},
+            sj2:{id:'sj2',name:'Módulo 2 – Historia de la Sociología y Estructura Social',cards:sj_m2},
+            sj3:{id:'sj3',name:'Módulo 3 – Motivaciones, Aprendizaje Social y Desviaciones',cards:sj_m3}
+          }},
+          [sid4]:{id:sid4,name:'Filosofía del Derecho',emoji:'🧠',topics:{}},
+          [sid5]:{id:sid5,name:'Taller de Escritura Jurídica',emoji:'✍️',topics:{}},
+          [sid6]:{id:sid6,name:'Introducción al Derecho',emoji:'📖',topics:{}},
+          [sid7]:{id:sid7,name:'Debate y Argumentación Jurídica',emoji:'🗣️',topics:{}}
+        }
+      },
+      b: {
+        id:'b', name:'Marketing Digital y Gerencia de Marca', year:'2do año',
+        university:'', color:'b', subjects:{}
+      }
+    },
+    tasks: [],
+    stats: { streak:0, lastStudy:null, studyDates:[] }
+  };
+}
+
+function load() {
+  try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(D)); } catch(e){}
+}
+
+// ======= UTILS =======
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function today() { return new Date().toISOString().slice(0,10); }
+function fmt(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const d = new Date(dateStr + 'T00:00:00');
+  return Math.round((d-now)/(86400000));
+}
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Buenos días';
+  if (h < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
+// ======= SPACED REPETITION =======
+function rateCard(card, rating) {
+  let box = card.box || 1;
+  if (rating === 0) box = 1;
+  else if (rating === 1) box = Math.max(1, box - 1);
+  else if (rating === 2) box = Math.min(5, box + 1);
+  else box = 5;
+  card.box = box;
+  const days = INTERVALS[box] || 1;
+  const next = new Date();
+  next.setDate(next.getDate() + days);
+  card.nextReview = next.getTime();
+  card.reviews = (card.reviews||0) + 1;
+  if (rating >= 2) card.correct = (card.correct||0) + 1;
+  return card;
+}
+
+function dueCards(topic) {
+  const now = Date.now();
+  return (topic.cards||[]).filter(c => !c.nextReview || c.nextReview <= now);
+}
+
+function topicProgress(topic) {
+  const cards = topic.cards||[];
+  if (!cards.length) return 0;
+  const mastered = cards.filter(c => c.box >= 5).length;
+  return Math.round((mastered/cards.length)*100);
+}
+
+function subjectProgress(subj) {
+  const topics = Object.values(subj.topics||{});
+  if (!topics.length) return 0;
+  const total = topics.reduce((s,t) => s + (t.cards||[]).length, 0);
+  if (!total) return 0;
+  const mastered = topics.reduce((s,t) => s + (t.cards||[]).filter(c=>c.box>=5).length, 0);
+  return Math.round((mastered/total)*100);
+}
+
+function readyLabel(pct) {
+  if (pct < 30) return '<span class="badge berr">Iniciando</span>';
+  if (pct < 60) return '<span class="badge bwarn">En progreso</span>';
+  if (pct < 90) return '<span class="badge ba">Avanzado</span>';
+  return '<span class="badge bok">Listo</span>';
+}
+
+// ======= AUTH =======
+function doLogin() {
+  const name = document.getElementById('l-name').value.trim();
+  const pin = document.getElementById('l-pin').value.trim();
+  if (!name || pin.length < 4) { alert('Ingresa tu nombre y un PIN de 4 dígitos.'); return; }
+  let data = load();
+  if (!data) {
+    D = defaultData(name, pin);
+    save();
+  } else if (data.user.pin !== pin) {
+    alert('PIN incorrecto.'); return;
+  } else {
+    D = data;
+  }
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('mob-nav').style.display = 'flex';
+  updateSidebar();
+  go('dashboard');
+}
+
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('mob-nav').style.display = 'none';
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('l-pin').value = '';
+}
+
+function updateSidebar() {
+  document.getElementById('sb-name').textContent = D.user.name;
+  const s = D.stats;
+  document.getElementById('sb-streak').textContent = `🔥 Racha: ${s.streak||0} día${s.streak!==1?'s':''}`;
+}
+
+// ======= NAVIGATION =======
+function go(screenId, saveCtx) {
+  if (saveCtx !== false) ctx.prevScreen = document.querySelector('.screen.active')?.id?.replace('screen-','');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item,.mob-it').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('screen-' + screenId);
+  if (el) { el.classList.add('active'); render(screenId); }
+  document.querySelectorAll('[data-s="'+screenId+'"]').forEach(n => n.classList.add('active'));
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  if (ctx.prevScreen) go(ctx.prevScreen, false);
+  else go('dashboard');
+}
+
+function render(id) {
+  if (id === 'dashboard') renderDash();
+  else if (id === 'career-a') renderCareer('a');
+  else if (id === 'career-b') renderCareer('b');
+  else if (id === 'subject') renderSubject();
+  else if (id === 'topic') renderTopic();
+  else if (id === 'study') renderStudyScreen();
+  else if (id === 'tasks') renderTasks();
+  else if (id === 'schedule') renderSchedule();
+}
+
+// ======= DASHBOARD =======
+function renderDash() {
+  document.getElementById('dash-greeting').textContent = `${greeting()}, ${D.user.name}`;
+
+  const careers = D.careers;
+  let totalCards = 0, totalMastered = 0, totalDue = 0;
+  ['a','b'].forEach(cid => {
+    Object.values(careers[cid].subjects||{}).forEach(sub => {
+      Object.values(sub.topics||{}).forEach(t => {
+        const cards = t.cards||[];
+        totalCards += cards.length;
+        totalMastered += cards.filter(c=>c.box>=5).length;
+        totalDue += dueCards(t).length;
+      });
+    });
+  });
+
+  const overallPct = totalCards ? Math.round((totalMastered/totalCards)*100) : 0;
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat"><div class="stat-lbl">Progreso global</div><div class="stat-val" style="color:var(--ca)">${overallPct}%</div><div class="stat-sub">${totalMastered} de ${totalCards} tarjetas</div></div>
+    <div class="stat"><div class="stat-lbl">Para repasar hoy</div><div class="stat-val" style="color:var(--warn)">${totalDue}</div><div class="stat-sub">tarjetas pendientes</div></div>
+    <div class="stat"><div class="stat-lbl">Racha</div><div class="stat-val" style="color:var(--ok)">${D.stats.streak||0}</div><div class="stat-sub">días consecutivos</div></div>
+    <div class="stat"><div class="stat-lbl">Total tarjetas</div><div class="stat-val">${totalCards}</div><div class="stat-sub">en el sistema</div></div>
+  `;
+
+  ['a','b'].forEach(cid => {
+    const subs = Object.values(careers[cid].subjects||{});
+    const el = document.getElementById(`dash-subs-${cid}`);
+    if (!subs.length) { el.innerHTML = '<div class="empty" style="padding:20px"><p style="font-size:13px;color:var(--tx2)">Sin materias aún. Añade una para comenzar.</p></div>'; return; }
+    el.innerHTML = subs.slice(0,4).map(s => {
+      const pct = subjectProgress(s);
+      return `<div class="sub-card" onclick="openSubject('${cid}','${s.id}')">
+        <div class="sub-icon" style="background:var(--c${cid}-bg)">${s.emoji||'📖'}</div>
+        <div class="sub-info"><div class="sub-name">${s.name}</div></div>
+        <div class="sub-right"><div class="sub-pct" style="color:var(--c${cid})">${pct}%</div><div class="pw"><div class="pf pf${cid}" style="width:${pct}%"></div></div></div>
+      </div>`;
+    }).join('');
+  });
+
+  const tasks = (D.tasks||[]).filter(t => !t.done).sort((a,b)=>(a.due||'z')>(b.due||'z')?1:-1);
+  const el = document.getElementById('dash-tasks');
+  if (!tasks.length) { el.innerHTML = '<p style="color:var(--tx2);font-size:13px">Sin tareas pendientes.</p>'; return; }
+  el.innerHTML = tasks.slice(0,5).map(t => taskHTML(t)).join('');
+}
+
+// ======= CAREER =======
+function renderCareer(cid) {
+  const career = D.careers[cid];
+  const subs = Object.values(career.subjects||{});
+  const listEl = document.getElementById(`list-subs-${cid}`);
+  listEl.innerHTML = subs.length ? subs.map(s => {
+    const pct = subjectProgress(s);
+    const total = Object.values(s.topics||{}).reduce((n,t)=>n+(t.cards||[]).length,0);
+    const due = Object.values(s.topics||{}).reduce((n,t)=>n+dueCards(t).length,0);
+    return `<div class="sub-card" onclick="openSubject('${cid}','${s.id}')">
+      <div class="sub-icon" style="background:var(--c${cid}-bg)">${s.emoji||'📖'}</div>
+      <div class="sub-info">
+        <div class="sub-name">${s.name}</div>
+        <div class="sub-meta">${total} tarjetas${due ? ` · <span style="color:var(--warn)">${due} para repasar</span>` : ''}</div>
+      </div>
+      <div class="sub-right">
+        <div class="sub-pct" style="color:var(--c${cid})">${pct}%</div>
+        <div class="pw"><div class="pf pf${cid}" style="width:${pct}%"></div></div>
+        ${readyLabel(pct)}
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><div class="empty-t">Sin materias aún</div><p>Añade tu primera materia con el botón de arriba.</p></div>`;
+}
+
+function openAddSubject(cid) {
+  const el = document.getElementById(`form-sub-${cid}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'block') {
+    el.innerHTML = `<div class="add-form">
+      <div class="add-form-hd">Nueva materia<button class="btn btn-g btn-sm" onclick="document.getElementById('form-sub-${cid}').style.display='none'">✕</button></div>
+      <div class="frow">
+        <div class="field"><label>Nombre de la materia</label><input type="text" id="ns-name-${cid}" placeholder="Ej: Derecho Civil"></div>
+        <div class="field" style="max-width:80px"><label>Emoji</label><input type="text" id="ns-emoji-${cid}" placeholder="📖" maxlength="2"></div>
+      </div>
+      <button class="btn btn-${cid}" onclick="saveSubject('${cid}')">Guardar materia</button>
+    </div>`;
+  }
+}
+
+function saveSubject(cid) {
+  const name = document.getElementById(`ns-name-${cid}`).value.trim();
+  if (!name) { alert('Escribe el nombre de la materia.'); return; }
+  const emoji = document.getElementById(`ns-emoji-${cid}`).value.trim() || '📖';
+  const id = uid();
+  D.careers[cid].subjects[id] = { id, name, emoji, topics: {} };
+  save();
+  document.getElementById(`form-sub-${cid}`).style.display = 'none';
+  renderCareer(cid);
+}
+
+// ======= SUBJECT =======
+function openSubject(cid, sid) {
+  ctx.careerId = cid; ctx.subjectId = sid;
+  go('subject');
+}
+
+function renderSubject() {
+  const cid = ctx.careerId, sid = ctx.subjectId;
+  const career = D.careers[cid];
+  const subj = career.subjects[sid];
+  if (!subj) return;
+
+  document.getElementById('subj-badge').className = `badge b${cid}`;
+  document.getElementById('subj-badge').textContent = career.year + ' · ' + career.name;
+  document.getElementById('subj-title').textContent = subj.emoji + ' ' + subj.name;
+
+  const topics = Object.values(subj.topics||{});
+  const total = topics.reduce((n,t)=>n+(t.cards||[]).length,0);
+  const mastered = topics.reduce((n,t)=>n+(t.cards||[]).filter(c=>c.box>=5).length,0);
+  const due = topics.reduce((n,t)=>n+dueCards(t).length,0);
+  const pct = total ? Math.round((mastered/total)*100) : 0;
+
+  document.getElementById('subj-meta').textContent = `${topics.length} tema${topics.length!==1?'s':''} · ${total} tarjetas · ${pct}% dominadas`;
+  document.getElementById('subj-stats').innerHTML = `
+    <div class="stat"><div class="stat-lbl">Progreso</div><div class="stat-val" style="color:var(--c${cid})">${pct}%</div><div class="pw" style="margin-top:6px"><div class="pf pf${cid}" style="width:${pct}%"></div></div></div>
+    <div class="stat"><div class="stat-lbl">Para repasar</div><div class="stat-val" style="color:var(--warn)">${due}</div><div class="stat-sub">tarjetas hoy</div></div>
+    <div class="stat"><div class="stat-lbl">Dominadas</div><div class="stat-val" style="color:var(--ok)">${mastered}</div><div class="stat-sub">de ${total}</div></div>
+  `;
+
+  document.getElementById('btn-add-topic').className = `btn btn-${cid} btn-sm`;
+  document.getElementById('btn-add-topic').onclick = () => openAddTopic(cid, sid);
+
+  const listEl = document.getElementById('subj-topics');
+  listEl.innerHTML = topics.length ? topics.map(t => {
+    const tpct = topicProgress(t);
+    const tdue = dueCards(t).length;
+    const cards = (t.cards||[]).length;
+    return `<div class="topic-row" onclick="openTopic('${cid}','${sid}','${t.id}')">
+      <div class="tdot" style="background:var(--c${cid})"></div>
+      <div class="tname">${t.name}</div>
+      <div class="tmeta">${cards} tarjeta${cards!==1?'s':''}</div>
+      ${tdue ? `<span class="badge bwarn">${tdue} hoy</span>` : ''}
+      <span class="badge b${cid}">${tpct}%</span>
+    </div>`;
+  }).join('') : `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><div class="empty-t">Sin temas</div><p>Añade un tema para esta materia.</p></div>`;
+}
+
+function openAddTopic(cid, sid) {
+  const el = document.getElementById('form-topic');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'block') {
+    el.innerHTML = `<div class="add-form">
+      <div class="add-form-hd">Nuevo tema<button class="btn btn-g btn-sm" onclick="document.getElementById('form-topic').style.display='none'">✕</button></div>
+      <div class="field"><label>Nombre del tema</label><input type="text" id="nt-name" placeholder="Ej: Fuentes del Derecho"></div>
+      <button class="btn btn-${cid}" onclick="saveTopic('${cid}','${sid}')">Guardar tema</button>
+    </div>`;
+  }
+}
+
+function saveTopic(cid, sid) {
+  const name = document.getElementById('nt-name').value.trim();
+  if (!name) { alert('Escribe el nombre del tema.'); return; }
+  const id = uid();
+  D.careers[cid].subjects[sid].topics[id] = { id, name, cards: [] };
+  save();
+  document.getElementById('form-topic').style.display = 'none';
+  renderSubject();
+}
+
+// ======= TOPIC =======
+function openTopic(cid, sid, tid) {
+  ctx.careerId = cid; ctx.subjectId = sid; ctx.topicId = tid;
+  go('topic');
+}
+
+function renderTopic() {
+  const cid = ctx.careerId, sid = ctx.subjectId, tid = ctx.topicId;
+  const career = D.careers[cid];
+  const subj = career.subjects[sid];
+  const topic = subj.topics[tid];
+  if (!topic) return;
+
+  document.getElementById('topic-subj-badge').className = `badge b${cid}`;
+  document.getElementById('topic-subj-badge').textContent = subj.name;
+  document.getElementById('topic-title').textContent = topic.name;
+
+  const cards = topic.cards||[];
+  const mastered = cards.filter(c=>c.box>=5).length;
+  const due = dueCards(topic).length;
+  const pct = topicProgress(topic);
+
+  document.getElementById('topic-meta').textContent = `${cards.length} tarjetas · ${pct}% dominadas`;
+  document.getElementById('topic-stats').innerHTML = `
+    <div class="stat"><div class="stat-lbl">Dominio</div><div class="stat-val" style="color:var(--c${cid})">${pct}%</div><div class="pw" style="margin-top:6px"><div class="pf pf${cid}" style="width:${pct}%"></div></div></div>
+    <div class="stat"><div class="stat-lbl">Repasar hoy</div><div class="stat-val" style="color:var(--warn)">${due}</div></div>
+    <div class="stat"><div class="stat-lbl">Dominadas</div><div class="stat-val" style="color:var(--ok)">${mastered}</div></div>
+  `;
+
+  const btnStudy = document.getElementById('btn-study-topic');
+  if (due > 0) {
+    btnStudy.className = `btn btn-${cid} btn-lg`;
+    btnStudy.textContent = `Estudiar ahora (${due} tarjetas) →`;
+    btnStudy.style.display = '';
+  } else if (cards.length > 0) {
+    btnStudy.className = 'btn btn-g btn-lg';
+    btnStudy.textContent = 'Repasar todo (no hay pendientes hoy)';
+    btnStudy.style.display = '';
+  } else {
+    btnStudy.style.display = 'none';
+  }
+
+  const listEl = document.getElementById('topic-cards-list');
+  if (!cards.length) {
+    listEl.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><div class="empty-t">Sin tarjetas</div><p>Añade tu primera tarjeta en la pestaña "+ Añadir tarjeta".</p></div>`;
+  } else {
+    listEl.innerHTML = cards.map((c,i) => {
+      const boxLabel = ['','Día 1','Día 3','Semana','2 semanas','Dominada'][c.box||1];
+      return `<div class="topic-row" style="flex-direction:column;align-items:flex-start;gap:6px;cursor:default">
+        <div style="display:flex;align-items:center;gap:8px;width:100%">
+          <span style="font-size:11px;color:var(--tx3);font-weight:700">#${i+1}</span>
+          <span class="badge b${cid}" style="font-size:10px">${boxLabel}</span>
+          <button class="btn btn-g btn-sm" style="margin-left:auto;padding:3px 8px;font-size:11px" onclick="deleteCard('${tid}',${i})">✕</button>
+        </div>
+        <div style="font-size:13.5px;font-weight:500">${c.q}</div>
+        <div style="font-size:12.5px;color:var(--tx2)">${c.a}</div>
+      </div>`;
+    }).join('');
+  }
+  topicTab('cards');
+}
+
+function topicTab(t) {
+  document.getElementById('topic-cards-view').style.display = t==='cards' ? 'block' : 'none';
+  document.getElementById('topic-add-view').style.display = t==='add' ? 'block' : 'none';
+  document.getElementById('ttab-cards').classList.toggle('active', t==='cards');
+  document.getElementById('ttab-add').classList.toggle('active', t==='add');
+}
+
+function addCard() {
+  const q = document.getElementById('new-q').value.trim();
+  const a = document.getElementById('new-a').value.trim();
+  if (!q || !a) { alert('Escribe la pregunta y la respuesta.'); return; }
+  const cid = ctx.careerId, sid = ctx.subjectId, tid = ctx.topicId;
+  const topic = D.careers[cid].subjects[sid].topics[tid];
+  topic.cards.push({ id:uid(), q, a, box:1, nextReview:null, reviews:0, correct:0 });
+  save();
+  document.getElementById('new-q').value = '';
+  document.getElementById('new-a').value = '';
+  renderTopic();
+  topicTab('cards');
+}
+
+function deleteCard(tid, idx) {
+  if (!confirm('¿Eliminar esta tarjeta?')) return;
+  const cid = ctx.careerId, sid = ctx.subjectId;
+  const topic = D.careers[cid].subjects[sid].topics[tid];
+  topic.cards.splice(idx, 1);
+  save();
+  renderTopic();
+}
+
+// ======= STUDY =======
+function startStudy() {
+  const cid = ctx.careerId, sid = ctx.subjectId, tid = ctx.topicId;
+  const topic = D.careers[cid].subjects[sid].topics[tid];
+  const due = dueCards(topic);
+  const all = topic.cards||[];
+  const cards = due.length > 0 ? due : all;
+  if (!cards.length) { alert('No hay tarjetas en este tema aún.'); return; }
+  session = { cid, sid, tid, cards: shuffle([...cards]), idx:0, correct:0, wrong:0, hard:0 };
+  go('study');
+}
+
+function shuffle(arr) {
+  for (let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+
+function renderStudyScreen() {
+  if (!session.cards.length) { renderStudyEnd(); return; }
+  renderStudyCard();
+}
+
+function renderStudyCard() {
+  const el = document.getElementById('study-area');
+  const total = session.cards.length;
+  const idx = session.idx;
+  if (idx >= total) { renderStudyEnd(); return; }
+  const card = session.cards[idx];
+  const cid = session.cid;
+  const pct = total ? Math.round((idx/total)*100) : 0;
+  const acc = (session.correct+session.hard+session.wrong) > 0 ? Math.round((session.correct/(session.correct+session.hard+session.wrong))*100) : 0;
+
+  el.innerHTML = `
+    <div class="fc-header">
+      <div class="fc-prog">Tarjeta <strong>${idx+1}</strong> de ${total}</div>
+      <div class="pw" style="flex:1;margin:0 12px"><div class="pf pf${cid}" style="width:${pct}%"></div></div>
+      <div style="text-align:right"><div class="fc-score-live" style="color:var(--c${cid})">${acc}%</div><div style="font-size:11px;color:var(--tx2)">precisión</div></div>
+    </div>
+    <div class="flashcard" onclick="revealCard()" id="fc-main">
+      <div class="fc-type">Pregunta — toca para ver respuesta</div>
+      <div class="fc-q">${escHtml(card.q)}</div>
+      <div class="fc-a" id="fc-answer">${escHtml(card.a)}</div>
+      <div class="fc-tap" id="fc-tap-hint">↓ Toca para revelar</div>
+    </div>
+    <div class="rating-grid rating-hide" id="rating-btns">
+      <button class="rbtn r0" onclick="rate(0)">✗ No sabía<span class="rl">Volver al inicio</span></button>
+      <button class="rbtn r1" onclick="rate(1)">~ Difícil<span class="rl">Retrocede un nivel</span></button>
+      <button class="rbtn r2" onclick="rate(2)">✓ Bien<span class="rl">Avanza un nivel</span></button>
+      <button class="rbtn r3" onclick="rate(3)">★ Perfecto<span class="rl">Dominada</span></button>
+    </div>
+  `;
+}
+
+function revealCard() {
+  const ans = document.getElementById('fc-answer');
+  const hint = document.getElementById('fc-tap-hint');
+  const btns = document.getElementById('rating-btns');
+  if (!ans) return;
+  ans.classList.add('show');
+  if (hint) hint.classList.add('hide');
+  if (btns) btns.classList.remove('rating-hide');
+}
+
+function rate(r) {
+  const card = session.cards[session.idx];
+  const cid = session.cid, sid = session.sid, tid = session.tid;
+  const topic = D.careers[cid].subjects[sid].topics[tid];
+  const realCard = topic.cards.find(c => c.id === card.id);
+  if (realCard) rateCard(realCard, r);
+  if (r >= 2) session.correct++;
+  else if (r === 1) session.hard++;
+  else session.wrong++;
+  save();
+  session.idx++;
+  if (session.idx >= session.cards.length) renderStudyEnd();
+  else renderStudyCard();
+}
+
+function renderStudyEnd() {
+  const total = session.cards.length;
+  const c = session.correct, h = session.hard, w = session.wrong;
+  const score = total ? Math.round((c/total)*100) : 0;
+  const color = score >= 80 ? 'var(--ok)' : score >= 50 ? 'var(--warn)' : 'var(--err)';
+  const msg = score >= 90 ? '¡Excelente dominio!' : score >= 70 ? 'Buen trabajo, sigue así.' : score >= 50 ? 'Vas bien, repasa lo difícil.' : 'Necesitas más práctica.';
+
+  // update streak
+  const td = today();
+  if (!D.stats.studyDates) D.stats.studyDates = [];
+  if (!D.stats.studyDates.includes(td)) {
+    D.stats.studyDates.push(td);
+    const yd = new Date(); yd.setDate(yd.getDate()-1);
+    const ydStr = yd.toISOString().slice(0,10);
+    D.stats.streak = D.stats.studyDates.includes(ydStr) ? (D.stats.streak||0)+1 : 1;
+    D.stats.lastStudy = td;
+    save();
+    updateSidebar();
+  }
+
+  document.getElementById('study-area').innerHTML = `
+    <div class="results">
+      <div class="results-score" style="color:${color}">${score}%</div>
+      <div class="results-lbl">${msg}</div>
+      <div class="results-breakdown">
+        <div class="stat"><div class="stat-lbl">✓ Correctas</div><div class="stat-val" style="color:var(--ok)">${c}</div></div>
+        <div class="stat"><div class="stat-lbl">~ Difícil</div><div class="stat-val" style="color:var(--warn)">${h}</div></div>
+        <div class="stat"><div class="stat-lbl">✗ Mal</div><div class="stat-val" style="color:var(--err)">${w}</div></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-${session.cid} btn-lg" onclick="startStudy()">Estudiar otra vez</button>
+        <button class="btn btn-g btn-lg" onclick="goBack()">Volver al tema</button>
+      </div>
+    </div>
+  `;
+}
+
+// ======= TASKS =======
+function taskHTML(t) {
+  const d = daysUntil(t.due);
+  let dueClass = '', dueText = '';
+  if (t.due) {
+    dueText = fmt(t.due);
+    if (d <= 0) { dueClass = 'turgent'; dueText += d < 0 ? ` (${Math.abs(d)}d vencida)` : ' (Hoy)'; }
+    else if (d <= 3) { dueClass = 'tsoon'; dueText += ` (en ${d}d)`; }
+  }
+  const badge = t.careerId === 'a' ? '<span class="badge ba">Derecho</span>' : '<span class="badge bb">Marketing</span>';
+  return `<div class="task-item">
+    <div class="tcheck ${t.done?'done':''}" onclick="toggleTask('${t.id}')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="tbody">
+      <div class="ttitle ${t.done?'done':''}">${escHtml(t.title)}</div>
+      <div class="tmetas">${badge}${t.subjectName?`<span>${t.subjectName}</span>`:''}${t.type?`<span style="text-transform:capitalize">${t.type}</span>`:''}${t.due?`<span class="${dueClass}">${dueText}</span>`:''}</div>
+    </div>
+    <button class="btn btn-g btn-sm" onclick="deleteTask('${t.id}')">✕</button>
+  </div>`;
+}
+
+function renderTasks() {
+  taskTab('pending');
+}
+
+function taskTab(t) {
+  ['pending','done','add'].forEach(id => {
+    document.getElementById(`tasks-${id}-view`).style.display = t===id ? 'block' : 'none';
+    document.getElementById(`ttask-${id}`).classList.toggle('active', t===id);
+  });
+  if (t === 'pending') {
+    const tasks = (D.tasks||[]).filter(t=>!t.done).sort((a,b)=>(a.due||'z')>(b.due||'z')?1:-1);
+    const el = document.getElementById('tasks-list-pending');
+    el.innerHTML = tasks.length ? tasks.map(t=>taskHTML(t)).join('') : '<div class="empty" style="padding:30px"><div class="empty-t">Sin tareas pendientes</div><p>Añade una con el botón "+ Nueva".</p></div>';
+  }
+  if (t === 'done') {
+    const tasks = (D.tasks||[]).filter(t=>t.done);
+    const el = document.getElementById('tasks-list-done');
+    el.innerHTML = tasks.length ? tasks.map(t=>taskHTML(t)).join('') : '<div class="empty" style="padding:30px"><div class="empty-t">Nada completado aún</div></div>';
+  }
+  if (t === 'add') {
+    const sel = document.getElementById('t-subject');
+    const cid = document.getElementById('t-career').value;
+    updateSubjectSelect(cid);
+    document.getElementById('t-career').onchange = () => updateSubjectSelect(document.getElementById('t-career').value);
+    const today2 = today();
+    document.getElementById('t-due').value = today2;
+  }
+}
+
+function updateSubjectSelect(cid) {
+  const sel = document.getElementById('t-subject');
+  if (!sel) return;
+  const subs = Object.values(D.careers[cid].subjects||{});
+  sel.innerHTML = '<option value="">Sin materia específica</option>' + subs.map(s=>`<option value="${s.id}" data-name="${s.name}">${s.name}</option>`).join('');
+}
+
+function addTask() {
+  const title = document.getElementById('t-title').value.trim();
+  if (!title) { alert('Escribe el título de la tarea.'); return; }
+  const cid = document.getElementById('t-career').value;
+  const sel = document.getElementById('t-subject');
+  const subjectId = sel.value;
+  const subjectName = subjectId ? sel.options[sel.selectedIndex].dataset.name : '';
+  const due = document.getElementById('t-due').value;
+  const type = document.getElementById('t-type').value;
+  const id = uid();
+  if (!D.tasks) D.tasks = [];
+  D.tasks.push({ id, title, careerId:cid, subjectId, subjectName, due, type, done:false, created:Date.now() });
+  save();
+  document.getElementById('t-title').value = '';
+  taskTab('pending');
+}
+
+function toggleTask(id) {
+  const t = D.tasks.find(t=>t.id===id);
+  if (t) { t.done = !t.done; save(); renderTasks(); }
+}
+
+function deleteTask(id) {
+  D.tasks = D.tasks.filter(t=>t.id!==id); save();
+  renderTasks();
+}
+
+// ======= SCHEDULE =======
+function renderSchedule() { schedTab('upcoming'); }
+
+function schedTab(t) {
+  document.getElementById('sched-upcoming').style.display = t==='upcoming' ? 'block' : 'none';
+  document.getElementById('sched-review').style.display = t==='review' ? 'block' : 'none';
+  document.getElementById('stab-up').classList.toggle('active', t==='upcoming');
+  document.getElementById('stab-rev').classList.toggle('active', t==='review');
+
+  if (t === 'upcoming') {
+    const tasks = (D.tasks||[]).filter(t=>!t.done && t.due).sort((a,b)=>a.due>b.due?1:-1);
+    if (!tasks.length) { document.getElementById('sched-upcoming').innerHTML = '<div class="empty"><div class="empty-t">Sin tareas programadas</div></div>'; return; }
+    const groups = {};
+    tasks.forEach(t => { if (!groups[t.due]) groups[t.due]=[]; groups[t.due].push(t); });
+    document.getElementById('sched-upcoming').innerHTML = Object.entries(groups).map(([date, ts]) => {
+      const d = daysUntil(date);
+      const label = d === 0 ? 'Hoy' : d === 1 ? 'Mañana' : d < 0 ? `Vencida hace ${Math.abs(d)} día${Math.abs(d)!==1?'s':''}` : fmt(date);
+      return `<div class="tl-day"><div class="tl-date">${label}</div>${ts.map(t=>taskHTML(t)).join('')}</div>`;
+    }).join('');
+  }
+
+  if (t === 'review') {
+    const rows = [];
+    ['a','b'].forEach(cid => {
+      Object.values(D.careers[cid].subjects||{}).forEach(sub => {
+        Object.values(sub.topics||{}).forEach(topic => {
+          const due = dueCards(topic).length;
+          if (due > 0) rows.push({ cid, subName:sub.name, topicName:topic.name, due, sid:sub.id, tid:topic.id });
+        });
+      });
+    });
+    if (!rows.length) { document.getElementById('sched-review').innerHTML = '<div class="empty"><div class="empty-t">¡Al día!</div><p>No tienes tarjetas pendientes de repaso.</p></div>'; return; }
+    document.getElementById('sched-review').innerHTML = rows.map(r => `
+      <div class="sub-card" onclick="openTopic('${r.cid}','${r.sid}','${r.tid}')">
+        <div style="flex:1;min-width:0">
+          <div class="sub-name">${r.topicName}</div>
+          <div class="sub-meta">${r.subName} · <span class="badge b${r.cid}" style="font-size:10px">${r.cid==='a'?'Derecho':'Marketing'}</span></div>
+        </div>
+        <span class="badge bwarn">${r.due} pendiente${r.due!==1?'s':''}</span>
+      </div>
+    `).join('');
+  }
+}
+
+// ======= HELPERS =======
+function escHtml(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ======= INIT =======
+document.addEventListener('DOMContentLoaded', () => {
+  const data = load();
+  if (data) {
+    D = data;
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('mob-nav').style.display = 'flex';
+    if (document.getElementById('l-name')) document.getElementById('l-name').value = D.user.name;
+    updateSidebar();
+    go('dashboard');
+  } else {
+    document.getElementById('screen-login').classList.add('active');
+  }
+
+  // Enter key on login
+  document.getElementById('l-pin').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+  document.getElementById('l-name').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('l-pin').focus(); });
+});
+</script>
