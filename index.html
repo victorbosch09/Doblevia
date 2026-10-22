@@ -1235,30 +1235,29 @@ document.querySelectorAll('.modal-backdrop').forEach(m=>{
 // ═══════════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', async ()=>{
-  // show loading state
-  document.getElementById('login-overlay').classList.add('visible');
-  document.getElementById('lp-pick').innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--tx2);font-size:14px">Conectando…</div>';
-
+document.addEventListener('DOMContentLoaded', ()=>{
+  // boot instantly from localStorage
   STORE = loadStore() || { users:{}, lastUser:null };
-
-  // try to load users from Supabase with 4s timeout
-  if(sb){
-    try {
-      const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),4000));
-      const remoteUsers = await Promise.race([sbLoadUsers(), timeout]);
-      if(remoteUsers){
-        Object.assign(STORE.users, remoteUsers);
-        localStorage.setItem(STORE_KEY, JSON.stringify(STORE));
-      }
-    } catch(e){ console.warn('Supabase load failed, using local data:', e.message); }
-  }
 
   const lastId = STORE.lastUser;
   if(lastId && STORE.users[lastId]){
     enterApp(lastId);
   } else {
+    document.getElementById('login-overlay').classList.add('visible');
     initLogin();
+  }
+
+  // sync from Supabase in background after UI is ready
+  if(sb){
+    sbLoadUsers().then(remoteUsers=>{
+      if(!remoteUsers) return;
+      Object.assign(STORE.users, remoteUsers);
+      localStorage.setItem(STORE_KEY, JSON.stringify(STORE));
+      // refresh user grid if still on login
+      if(document.getElementById('login-overlay').classList.contains('visible')){
+        renderUserGrid();
+      }
+    }).catch(()=>{});
   }
 });
 </script>
